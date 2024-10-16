@@ -59,6 +59,8 @@ namespace Ensamblador{
             asm = new StreamWriter(Path.GetFileNameWithoutExtension(nombre) + ".asm");
             asm.AutoFlush = true;
             log.WriteLine("Analizador Lexico");
+            asm.WriteLine("Autores: Don guamas y El greñas");
+            asm.WriteLine("Analizador léxico");
 
             if (Path.GetExtension(nombre) != ".cpp")
             {

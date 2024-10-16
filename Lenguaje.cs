@@ -33,6 +33,8 @@ namespace Semantica
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
+            asm.WriteLine("Analizador Sintactico");
+            asm.WriteLine("Analizador Semántico");
             listaVariables = new List<Variable>();
             S = new Stack<float>();
         }
@@ -94,9 +96,22 @@ namespace Semantica
         private void imprimeVariables()
         {
             log.WriteLine("Lista de variables");
+            asm.WriteLine("\nsegment .data");
             foreach (Variable v in listaVariables)
             {
-                log.WriteLine(v.Nombre + " (" + v.Tipo + ") = " + v.Valor);
+               // log.WriteLine(v.getNombre() + " (" + v.getTipo() + ") = " + v.getValor());
+                if (v.Tipo == Variable.TipoDato.Char)
+                {
+					asm.WriteLine("\t" + v.Nombre+ " db 0");
+				}
+                else if (v.Tipo == Variable.TipoDato.Int)
+                {
+					asm.WriteLine("\t" + v.Nombre + " dd 0");
+				}
+				else
+                {
+					asm.WriteLine("\t" + v.Nombre + " dq 0 ");
+				}
             }
         }
         // ListaIdentificadores -> identificador (,ListaIdentificadores)?
@@ -238,6 +253,8 @@ namespace Semantica
                 {
                     Expresion();
                     nuevoValor = S.Pop();
+                    asm.WriteLine("\tpop");
+                
                 }
             }
             else if (Contenido == "++")
@@ -255,6 +272,7 @@ namespace Semantica
                 match("+=");
                 Expresion();
                 nuevoValor += S.Pop();
+                asm.WriteLine("\tpop");
             }
             else if (Contenido == "-=")
             {
@@ -267,18 +285,21 @@ namespace Semantica
                 match("*=");
                 Expresion();
                 nuevoValor *= S.Pop();
+                asm.WriteLine("\tpop");
             }
             else if (Contenido == "/=")
             {
                 match("/=");
                 Expresion();
                 nuevoValor /= S.Pop();
+                asm.WriteLine("\tpop");
             }
             else
             {
                 match("%=");
                 Expresion();
                 nuevoValor %= S.Pop();
+                asm.WriteLine("\tpop");
             }
             // match(";");
             if (analisisSemantico(v, nuevoValor))
@@ -375,7 +396,9 @@ namespace Semantica
             match(Tipos.OpRelacional);
             Expresion(); // E2
             float R2 = S.Pop();
+            asm.WriteLine("\tpop ax");
             float R1 = S.Pop();
+            asm.WriteLine("\tpop bx");
             switch (operador)
             {
                 case ">": return R1 > R2;
@@ -420,9 +443,7 @@ namespace Semantica
             }//
 
         }
-        // Do -> do 
-        //          bloqueInstrucciones | intruccion 
-        //       while(Condicion);
+
         private void Do(bool ejecutar)
         {
             int cTemp = caracter - 3;
@@ -644,6 +665,7 @@ namespace Semantica
         // Main      -> static void Main(string[] args) BloqueInstrucciones 
         private void Main()
         {
+            
             match("static");
             match("void");
             match("Main");
@@ -670,7 +692,9 @@ namespace Semantica
                 match(Tipos.OpTermino);
                 Termino();
                 float R1 = S.Pop();
+                asm.WriteLine("\tpop ax");
                 float R2 = S.Pop();
+                asm.WriteLine("\tpop bx");
                 switch (operador)
                 {
                     case "+":
@@ -699,7 +723,9 @@ namespace Semantica
                 match(Tipos.OpFactor);
                 Factor();
                 float R1 = S.Pop();
+                asm.WriteLine("\tpop ax");
                 float R2 = S.Pop();
+                asm.WriteLine("\tpop bx");
                 switch (operador)
                 {
                     case "*": S.Push(R2 * R1); break;
@@ -758,6 +784,7 @@ namespace Semantica
                 {
                     tipoDatoExpresion = aCastear;
                     float valor = S.Pop();
+                    asm.WriteLine("\tpop");
                     if (aCastear == Variable.TipoDato.Char)
                     {
                         valor %= 256;
