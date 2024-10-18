@@ -10,17 +10,12 @@ using System.Net.Http.Headers;
 
 using Ensamblador;
 /*
-    1. Usar find en lugar del for each                                  -Listo
-    2. Valiar que no existan varibles duplicadas                        -Listo
-    3. Validar que existan las variables en las expressions matematicas -Listo
-       Asignacion
-    4. Asinar una expresion matematica a la variable al momento de declararla -Listo
-       verificando la semantica
-    5. Validar que en el ReadLine se capturen solo numeros (Excepcion)   -Listo
-    6. listaConcatenacion: 30, 40, 50, 12, 0                            -Listo 
-    7. Quitar comillas y considerar el Write                           -Listo 
-    8. Emular el for -- 15 puntos                                      -No listo
-    9. Emular el while -- 15 puntos                                    -No listo
+    1. Completar asignación               --> 
+    2. Console.Write & Console.WriteLine  --> 
+    3. Console.Read & Console.ReadLine    --> 
+    4. Considerar else en el If           -->
+    5. Programar el while                 -->
+    6. Programar el for                   -->
 */
 
 namespace Semantica
@@ -30,6 +25,8 @@ namespace Semantica
         private List<Variable> listaVariables;
         private Stack<float> S;
         private Variable.TipoDato tipoDatoExpresion;
+
+        private int cIFs,cDoes;
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
@@ -37,14 +34,16 @@ namespace Semantica
             asm.WriteLine("Analizador Semántico");
             listaVariables = new List<Variable>();
             S = new Stack<float>();
+            cIFs=cDoes=1;
         }
         public Lenguaje(string nombre) : base(nombre)
         {
             log.WriteLine("Analizador Sintactico");
             listaVariables = new List<Variable>();
             S = new Stack<float>();
+            cIFs=cDoes=1;
+            //Por cada if, debe genera una etiqueta
         }
-        // Programa  -> Librerias? Main
         public void Programa()
         {
             if (Contenido == "using")
@@ -54,7 +53,6 @@ namespace Semantica
             Main();
             imprimeVariables();
         }
-        // Librerias -> using ListaLibrerias; Librerias?
         private void Librerias()
         {
             match("using");
@@ -212,6 +210,7 @@ namespace Semantica
                 throw new Error("Semantico: la variable \"" + variable + "\" no ha sido declarada; línea: " + linea, log);
             }
             match(Tipos.Identificador);
+            asm.WriteLine("; Asignacion a " + variable);
             var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == variable; });
             float nuevoValor = v.Valor;
 
@@ -253,18 +252,21 @@ namespace Semantica
                 {
                     Expresion();
                     nuevoValor = S.Pop();
-                    asm.WriteLine("\tpop");
+                    asm.WriteLine("\tpop ax");
+                    asm.WriteLine("\tmov "+variable+", ax");
                 
                 }
             }
             else if (Contenido == "++")
             {
                 match("++");
+                asm.WriteLine("\tinc "+variable);
                 nuevoValor++;
             }
             else if (Contenido == "--")
             {
                 match("--");
+                asm.WriteLine("\tdec "+variable);
                 nuevoValor--;
             }
             else if (Contenido == "+=")
@@ -272,34 +274,35 @@ namespace Semantica
                 match("+=");
                 Expresion();
                 nuevoValor += S.Pop();
-                asm.WriteLine("\tpop");
+                asm.WriteLine("\tpop ax");
             }
             else if (Contenido == "-=")
             {
                 match("-=");
                 Expresion();
                 nuevoValor -= S.Pop();
+                asm.WriteLine("\tpop ax");
             }
             else if (Contenido == "*=")
             {
                 match("*=");
                 Expresion();
                 nuevoValor *= S.Pop();
-                asm.WriteLine("\tpop");
+                asm.WriteLine("\tpop ax");
             }
             else if (Contenido == "/=")
             {
                 match("/=");
                 Expresion();
                 nuevoValor /= S.Pop();
-                asm.WriteLine("\tpop");
+                asm.WriteLine("\tpop ax");
             }
             else
             {
                 match("%=");
                 Expresion();
                 nuevoValor %= S.Pop();
-                asm.WriteLine("\tpop");
+                asm.WriteLine("\tpop ax");
             }
             // match(";");
             if (analisisSemantico(v, nuevoValor))
@@ -359,10 +362,10 @@ namespace Semantica
             }
             return true;
         }
-        // If -> if (Condicion) bloqueInstrucciones | instruccion
-        // (else bloqueInstrucciones | instruccion)?
         private void If(bool ejecutar)
         {
+            asm.WriteLine("; if"+cIFs);
+            string etiqueta = "; _if"+ cIFs++;
             match("if");
             match("(");
             bool resultado = Condicion();
@@ -387,11 +390,13 @@ namespace Semantica
                     Instruccion(!resultado && ejecutar);
                 }
             }
+            asm.WriteLine(etiqueta + ":");
+            //Generar etiqueta para que la condición diga a que etiqueta saltar
         }
-        // Condicion -> Expresion operadorRelacional Expresion
         private bool Condicion()
         {
             Expresion(); // E1
+            string etiqueta="";
             string operador = Contenido;
             match(Tipos.OpRelacional);
             Expresion(); // E2
@@ -399,14 +404,17 @@ namespace Semantica
             asm.WriteLine("\tpop ax");
             float R1 = S.Pop();
             asm.WriteLine("\tpop bx");
+            asm.WriteLine("\tcmp ax, bx");
             switch (operador)
             {
                 case ">": return R1 > R2;
                 case ">=": return R1 >= R2;
                 case "<": return R1 < R2;
                 case "<=": return R1 <= R2;
-                case "==": return R1 == R2;
-                default: return R1 != R2;
+                case "==": asm.WriteLine("\tjne "+etiqueta);
+                 return R1 == R2;
+                default:  asm.WriteLine("\tje"+etiqueta);
+                return R1 != R2;
             }
         }
         // While -> while(Condicion) bloqueInstrucciones | instruccion
@@ -446,9 +454,13 @@ namespace Semantica
 
         private void Do(bool ejecutar)
         {
+
+            string etiqueta = "Do"+cDoes++;
+
             int cTemp = caracter - 3;
             int lTemp = linea;
             bool resultado = false;
+            
             do
             {
                 match("do");
@@ -692,17 +704,21 @@ namespace Semantica
                 match(Tipos.OpTermino);
                 Termino();
                 float R1 = S.Pop();
-                asm.WriteLine("\tpop ax");
-                float R2 = S.Pop();
                 asm.WriteLine("\tpop bx");
+                float R2 = S.Pop();
+                asm.WriteLine("\tpop ax");
                 switch (operador)
                 {
                     case "+":
                         S.Push(R2 + R1);
+                        asm.WriteLine("\tadd ax, bx");
+                        asm.WriteLine("\tpush ax");
                         tipoDatoExpresion = valorToTipo(R2 + R1);
                         break;
                     case "-":
                         S.Push(R2 - R1);
+                        asm.WriteLine("\tsub ax, bx");
+                        asm.WriteLine("\tpush ax");
                         tipoDatoExpresion = valorToTipo(R2 - R1);
                         break;
                 }
@@ -723,14 +739,20 @@ namespace Semantica
                 match(Tipos.OpFactor);
                 Factor();
                 float R1 = S.Pop();
-                asm.WriteLine("\tpop ax");
-                float R2 = S.Pop();
                 asm.WriteLine("\tpop bx");
+                float R2 = S.Pop();
+                asm.WriteLine("\tpop ax");
                 switch (operador)
                 {
-                    case "*": S.Push(R2 * R1); break;
-                    case "/": S.Push(R2 / R1); break;
-                    case "%": S.Push(R2 % R1); break;
+                    case "*": S.Push(R2 * R1);
+                    asm.WriteLine("\tmul bx");
+                    asm.WriteLine("\tpush ax"); break;
+                    case "/": S.Push(R2 / R1);
+                    asm.WriteLine("\tdiv bx");
+                    asm.WriteLine("\tpush ax"); break;
+                    case "%": S.Push(R2 % R1);
+                    asm.WriteLine("\tdiv bx");
+                    asm.WriteLine("\tpush dx"); break;
                 }
             }
         }
@@ -749,6 +771,8 @@ namespace Semantica
             if (Clasificacion == Tipos.Numero)
             {
                 S.Push(float.Parse(Contenido));
+                asm.WriteLine("\tmov ax, "+Contenido);
+                asm.WriteLine("\tpush");
                 if (tipoDatoExpresion < valorToTipo(float.Parse(Contenido)))
                 {
                     tipoDatoExpresion = valorToTipo(float.Parse(Contenido));
@@ -759,6 +783,8 @@ namespace Semantica
             {
                 var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
                 S.Push(v.Valor);
+                asm.WriteLine("\tmov ax, "+Contenido);
+                asm.WriteLine("\tpush");
                 if (tipoDatoExpresion < v.Tipo)
                 {
                     tipoDatoExpresion = v.Tipo;
@@ -784,7 +810,7 @@ namespace Semantica
                 {
                     tipoDatoExpresion = aCastear;
                     float valor = S.Pop();
-                    asm.WriteLine("\tpop");
+                    asm.WriteLine("\tpop ax");
                     if (aCastear == Variable.TipoDato.Char)
                     {
                         valor %= 256;
@@ -794,6 +820,8 @@ namespace Semantica
                         valor %= 65536;
                     }
                     S.Push(valor);
+                    asm.WriteLine("\tmov ax, "+valor);
+                    asm.WriteLine("\tpush dx");
                 }
             }
         }

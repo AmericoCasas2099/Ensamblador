@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-   char x;
+   char x,y;
    x = (3+5)*8-(10-4)/2;
- 
-  float y;
-  int c;
+   if(x==62){
+    x=0;
+    if(x!=0){
+      x=1;
+    }
+   }
 }
