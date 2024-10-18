@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-   char x,y;
+   int x,y;
    x = (3+5)*8-(10-4)/2;
    if(x==62){
     x=0;

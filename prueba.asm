@@ -3,68 +3,68 @@ Analizador léxico
 Analizador Sintactico
 Analizador Semántico
 ; Asignacion a x
-	mov ax, 3
+	mov eax, 3
 	push
-	mov ax, 5
+	mov eax, 5
 	push
-	pop bx
-	pop ax
-	add ax, bx
+	pop ebx
+	pop eax
+	add eax, ebx
 	push ax
-	mov ax, 8
+	mov eax, 8
 	push
-	pop bx
-	pop ax
-	mul bx
-	push ax
-	mov ax, 10
+	pop ebx
+	pop eax
+	mul ebx
+	push eax
+	mov eax, 10
 	push
-	mov ax, 4
+	mov eax, 4
 	push
-	pop bx
-	pop ax
-	sub ax, bx
-	push ax
-	mov ax, 2
+	pop ebx
+	pop eax
+	sub eax, ebx
+	push eax
+	mov eax, 2
 	push
-	pop bx
-	pop ax
-	div bx
-	push ax
-	pop bx
-	pop ax
-	sub ax, bx
-	push ax
-	pop ax
-	mov x, ax
+	pop ebx
+	pop eax
+	div ebx
+	push eax
+	pop ebx
+	pop eax
+	sub eax, ebx
+	push eax
+	pop eax
+	mov x, eax
 ; if1
-	mov ax, x
+	mov eax, x
 	push
-	mov ax, 62
+	mov eax, 62
 	push
-	pop ax
-	pop bx
-	cmp ax, bx
+	pop eax
+	pop ebx
+	cmp eax, ebx
 	jne 
 ; Asignacion a x
-	mov ax, 0
+	mov eax, 0
 	push
-	pop ax
-	mov x, ax
+	pop eax
+	mov x, eax
 ; if2
-	mov ax, x
+	mov eax, x
 	push
-	mov ax, 0
+	mov eax, 0
 	push
-	pop ax
-	pop bx
-	cmp ax, bx
+	pop eax
+	pop ebx
+	cmp eax, ebx
 	je
 ; Asignacion a x
-	mov ax, 1
+	mov eax, 1
 	push
-	pop ax
-	mov x, ax
+	pop eax
+	mov x, eax
 ; _if2:
 ; _if1:
 
