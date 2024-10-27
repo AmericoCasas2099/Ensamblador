@@ -2,31 +2,41 @@ Autores: Don guamas y El greñas
 Analizador léxico
 Analizador Sintactico
 Analizador Semántico
+
+extern fflush
+extern printf
+extern scanf
+extern stdout
+
+segment .text
+	global _main
+
+_main:
 ; Asignacion a x
 	mov eax, 3
-	push
+	push eax
 	mov eax, 5
-	push
+	push eax
 	pop ebx
 	pop eax
 	add eax, ebx
-	push ax
+	push eax
 	mov eax, 8
-	push
+	push eax
 	pop ebx
 	pop eax
 	mul ebx
 	push eax
 	mov eax, 10
-	push
+	push eax
 	mov eax, 4
-	push
+	push eax
 	pop ebx
 	pop eax
 	sub eax, ebx
 	push eax
 	mov eax, 2
-	push
+	push eax
 	pop ebx
 	pop eax
 	div ebx
@@ -36,37 +46,42 @@ Analizador Semántico
 	sub eax, ebx
 	push eax
 	pop eax
-	mov x, eax
+	mov dword [x], eax
 ; if1
 	mov eax, x
-	push
+	push eax
 	mov eax, 62
-	push
+	push eax
 	pop eax
 	pop ebx
 	cmp eax, ebx
-	jne 
+	jne ; _if1
 ; Asignacion a x
 	mov eax, 0
-	push
+	push eax
 	pop eax
-	mov x, eax
+	mov dword [x], eax
 ; if2
 	mov eax, x
-	push
+	push eax
 	mov eax, 0
-	push
+	push eax
 	pop eax
 	pop ebx
 	cmp eax, ebx
-	je
+	je ; _if2
 ; Asignacion a x
 	mov eax, 1
-	push
+	push eax
 	pop eax
-	mov x, eax
+	mov dword [x], eax
 ; _if2:
 ; _if1:
+	add esp, 4
+
+	mov eax, 1
+	xor ebx, ebx
+	int 0x80
 
 segment .data
 	x db 0
