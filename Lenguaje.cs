@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 
 /*
-    1. Completar asignación               --> 
+    1. Completar asignación               --> Listo
     2. Console.Write & Console.WriteLine  --> 
     3. Console.Read & Console.ReadLine    --> 
     4. Considerar else en el If           --> Creo que ya
@@ -216,6 +216,11 @@ namespace Ensamblador
                     else
                     {
                         match("ReadLine");
+  
+                        asm.WriteLine("mov eax, input_buffer");          
+                        asm.WriteLine("push eax");                       
+                        asm.WriteLine("call scanf");                     
+                        asm.WriteLine("mov dword ["+variable+"], input_buffer");
 
                     }
                     match("(");
@@ -273,7 +278,7 @@ namespace Ensamblador
                 Expresion();
                 asm.WriteLine("\tpop eax");
                 asm.WriteLine("\tmov ebx, dword [" + variable + "]");
-                asm.WriteLine("\tidiv ebx");         
+                asm.WriteLine("\tidiv ebx");
                 asm.WriteLine("\tmov dword [" + variable + "], eax");
             }
             else if (Contenido == "%=")
@@ -283,8 +288,8 @@ namespace Ensamblador
                 asm.WriteLine("\txor edx, edx");
                 asm.WriteLine("\tpop eax");
                 asm.WriteLine("\tmov ebx, dword [" + variable + "]");
-                asm.WriteLine("\tidiv ebx");          
-                asm.WriteLine("\tmov dword [" + variable + "], edx"); 
+                asm.WriteLine("\tidiv ebx");
+                asm.WriteLine("\tmov dword [" + variable + "], edx");
             }
             // match(";");
             v.Valor = nuevoValor;
@@ -295,15 +300,17 @@ namespace Ensamblador
 
         private void If()
         {
-            asm.WriteLine("; if" + cIFs);
-            string etiqueta = "; _if" + cIFs++;
-            string etiqueta2 = "; _else " + cElses++;
-            string etiquetaFin = "; _finIf" + cIFs;
+            bool elseExiste = false;
+            asm.WriteLine("_if" + cIFs);
+            string etiqueta = "_if" + cIFs++;
+            string etiqueta2 = "_else" + cElses++;
+            string etiquetaFin = "_finIf" + cIFs;
             match("if");
             match("(");
             Condicion(etiqueta);
             match(")");
-            asm.WriteLine("jz " + etiqueta2);
+
+            //asm.WriteLine("jz " + etiqueta2);
             if (Contenido == "{")
             {
                 bloqueInstrucciones();
@@ -312,11 +319,14 @@ namespace Ensamblador
             {
                 Instruccion();
             }
-            asm.WriteLine("jmp " + etiquetaFin);
-            asm.WriteLine(etiqueta2 + ":");
+            //asm.WriteLine("jmp " + etiquetaFin);
+            asm.WriteLine(etiqueta);
+
             if (Contenido == "else")
             {
+                asm.WriteLine(etiqueta2 + ":");
                 match("else");
+                elseExiste = true;
                 if (Contenido == "{")
                 {
                     bloqueInstrucciones();
@@ -325,8 +335,9 @@ namespace Ensamblador
                 {
                     Instruccion();
                 }
+                asm.WriteLine(etiqueta2);
             }
-            asm.WriteLine(etiquetaFin + ":");
+            asm.WriteLine(etiqueta);
             //Generar etiqueta para que la condición diga a que etiqueta saltar
         }
         private void Condicion(string etiqueta)

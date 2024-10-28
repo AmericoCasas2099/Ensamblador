@@ -16,61 +16,22 @@ _main:
 ; Asignacion a x
 	mov eax, 3
 	push eax
-	mov eax, 5
-	push eax
-	pop ebx
-	pop eax
-	add eax, ebx
-	push eax
-	mov eax, 8
-	push eax
-	pop ebx
-	pop eax
-	mul ebx
-	push eax
-	mov eax, 10
-	push eax
-	mov eax, 4
-	push eax
-	pop ebx
-	pop eax
-	sub eax, ebx
-	push eax
-	mov eax, 2
-	push eax
-	pop ebx
-	pop eax
-	div ebx
-	push eax
-	pop ebx
-	pop eax
-	sub eax, ebx
-	push eax
 	pop eax
 	mov dword [x], eax
-; if1
+; while 1
+_whileIni1:
 	mov eax, x
 	push eax
-	mov eax, 62
+	mov eax, 0
 	push eax
 	pop eax
 	pop ebx
 	cmp eax, ebx
-	jne ; _if1
-jz ; _else 1
+	jle _whileFin1
 ; Asignacion a x
-	mov eax, 0
-	push eax
-	pop eax
-	mov dword [x], eax
-jmp ; _finIf2
-; _else 1:
-; _finIf2:
-; Asignacion a x
-	mov eax, 2
-	push eax
-	pop eax
-	add [x], eax
+	dec x
+jmp _whileIni1
+_whileFin1:
 	add esp, 4
 
 	mov eax, 1
