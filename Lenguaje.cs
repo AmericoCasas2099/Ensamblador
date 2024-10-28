@@ -12,7 +12,7 @@ using System.Net.Http.Headers;
     1. Completar asignación               --> 
     2. Console.Write & Console.WriteLine  --> 
     3. Console.Read & Console.ReadLine    --> 
-    4. Considerar else en el If           -->
+    4. Considerar else en el If           --> Creo que ya
     5. Programar el while                 -->
     6. Programar el for                   -->
 */
@@ -23,7 +23,7 @@ namespace Ensamblador
     {
         private List<Variable> listaVariables;
       
-        private int cIFs, cDoes,cWhiles;
+        private int cIFs, cDoes,cWhiles,cElses;
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
@@ -31,7 +31,7 @@ namespace Ensamblador
             asm.WriteLine("Analizador Semántico");
             listaVariables = new List<Variable>();
 
-            cIFs = cDoes = 1;
+            cIFs=cElses=cDoes = 1;
         }
         public Lenguaje(string nombre) : base(nombre)
         {
@@ -39,7 +39,7 @@ namespace Ensamblador
             asm.WriteLine("; Analizador Sintactico");
             asm.WriteLine("; Analizador Semantico");
             listaVariables = new List<Variable>();
-            cIFs = cDoes = 1;
+            cIFs=cElses=cDoes = 1;
             //Por cada if, debe generar una etiqueta
         }
         public void Programa()
@@ -283,10 +283,13 @@ namespace Ensamblador
         {
             asm.WriteLine("; if" + cIFs);
             string etiqueta = "; _if" + cIFs++;
+            string etiqueta2 = "; _else "+cElses++;
+            string etiquetaFin = "; _finIf" + cIFs;
             match("if");
             match("(");
             Condicion(etiqueta);
             match(")");
+            asm.WriteLine("jz " + etiqueta2); 
             if (Contenido == "{")
             {
                 bloqueInstrucciones();
@@ -295,6 +298,8 @@ namespace Ensamblador
             {
                 Instruccion();
             }
+            asm.WriteLine("jmp " + etiquetaFin);
+            asm.WriteLine(etiqueta2 + ":");
             if (Contenido == "else")
             {
                 match("else");
@@ -307,7 +312,7 @@ namespace Ensamblador
                     Instruccion();
                 }
             }
-            asm.WriteLine(etiqueta + ":");
+            asm.WriteLine(etiquetaFin + ":");
             //Generar etiqueta para que la condición diga a que etiqueta saltar
         }
         private void Condicion(string etiqueta)

@@ -1,4 +1,5 @@
-Autores: Don guamas y El greñas
+Autores: Luis Américo Casas Vázquez,
+Habid Hazel Avitud Cruz
 Analizador léxico
 Analizador Sintactico
 Analizador Semántico
