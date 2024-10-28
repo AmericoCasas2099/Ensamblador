@@ -23,7 +23,7 @@ namespace Ensamblador
     {
         private List<Variable> listaVariables;
 
-        private int cIFs, cDoes, cWhiles, cElses;
+        private int cIFs, cDoes, cWhiles, cElses,cFor;
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
@@ -31,7 +31,7 @@ namespace Ensamblador
             asm.WriteLine("Analizador Semántico");
             listaVariables = new List<Variable>();
 
-            cIFs = cElses = cDoes = 1;
+            cIFs = cElses = cDoes= cFor = 1;
         }
         public Lenguaje(string nombre) : base(nombre)
         {
@@ -39,7 +39,7 @@ namespace Ensamblador
             asm.WriteLine("; Analizador Sintactico");
             asm.WriteLine("; Analizador Semantico");
             listaVariables = new List<Variable>();
-            cIFs = cElses = cDoes = 1;
+            cIFs = cElses = cDoes= cFor = 1;
             //Por cada if, debe generar una etiqueta
         }
         public void Programa()
@@ -321,7 +321,6 @@ namespace Ensamblador
             }
             //asm.WriteLine("jmp " + etiquetaFin);
             asm.WriteLine(etiqueta);
-
             if (Contenido == "else")
             {
                 asm.WriteLine(etiqueta2 + ":");
@@ -419,11 +418,15 @@ namespace Ensamblador
         //          BloqueInstrucciones | Intruccion
         private void For()
         {
+            asm.WriteLine("; for"+ ++cFor);
+            string etiquetaIni = "_ForIni" + cFor;
+            string etiquetaFin = "_ForFin" + cFor;
             match("for");
             match("(");
+            asm.WriteLine(etiquetaIni + ":");
             Asignacion();
             match(";");
-            Condicion("");
+            Condicion(etiquetaFin);
             match(";");
             Asignacion();
             match(")");
@@ -435,6 +438,8 @@ namespace Ensamblador
             {
                 Instruccion();
             }
+            asm.WriteLine("jmp " + etiquetaIni);
+            asm.WriteLine(etiquetaFin + ":");
         }
 
 

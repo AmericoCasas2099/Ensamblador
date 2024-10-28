@@ -18,20 +18,35 @@ _main:
 	push eax
 	pop eax
 	mov dword [x], eax
-; while 1
-_whileIni1:
-	mov eax, x
-	push eax
+; Asignacion a y
 	mov eax, 0
+	push eax
+	pop eax
+	mov dword [y], eax
+; for2
+_ForIni2:
+; Asignacion a y
+	mov eax, 0
+	push eax
+	pop eax
+	mov dword [y], eax
+	mov eax, y
+	push eax
+	mov eax, 3
 	push eax
 	pop eax
 	pop ebx
 	cmp eax, ebx
-	jle _whileFin1
+	jge _ForFin2
+; Asignacion a y
+	inc dword [y]
 ; Asignacion a x
-	dec x
-jmp _whileIni1
-_whileFin1:
+	mov eax, 1
+	push eax
+	pop eax
+	add [x], eax
+jmp _ForIni2
+_ForFin2:
 	add esp, 4
 
 	mov eax, 1
