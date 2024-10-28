@@ -57,27 +57,20 @@ _main:
 	pop ebx
 	cmp eax, ebx
 	jne ; _if1
+jz ; _else 1
 ; Asignacion a x
 	mov eax, 0
 	push eax
 	pop eax
 	mov dword [x], eax
-; if2
-	mov eax, x
-	push eax
-	mov eax, 0
-	push eax
-	pop eax
-	pop ebx
-	cmp eax, ebx
-	je ; _if2
+jmp ; _finIf2
+; _else 1:
+; _finIf2:
 ; Asignacion a x
-	mov eax, 1
+	mov eax, 2
 	push eax
 	pop eax
-	mov dword [x], eax
-; _if2:
-; _if1:
+	add [x], eax
 	add esp, 4
 
 	mov eax, 1

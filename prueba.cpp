@@ -9,8 +9,6 @@ static void Main(string[] args)
    x = (3+5)*8-(10-4)/2;
    if(x==62){
     x=0;
-    if(x!=0){
-      x=1;
-    }
    }
+   x+=2;
 }
