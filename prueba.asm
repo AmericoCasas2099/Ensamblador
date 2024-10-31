@@ -23,13 +23,10 @@ _main:
 	push eax
 	pop eax
 	mov dword [y], eax
-; for2
-_ForIni2:
+; do 1
+_do1:
 ; Asignacion a y
-	mov eax, 0
-	push eax
-	pop eax
-	mov dword [y], eax
+	inc dword [y]
 	mov eax, y
 	push eax
 	mov eax, 3
@@ -37,16 +34,8 @@ _ForIni2:
 	pop eax
 	pop ebx
 	cmp eax, ebx
-	jge _ForFin2
-; Asignacion a y
-	inc dword [y]
-; Asignacion a x
-	mov eax, 1
-	push eax
-	pop eax
-	add [x], eax
-jmp _ForIni2
-_ForFin2:
+	jge _do1
+	PRINT_STRING y = 
 	add esp, 4
 
 	mov eax, 1

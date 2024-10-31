@@ -445,17 +445,29 @@ namespace Ensamblador
 
         private void console()
         {
+            string texto = "";
             match("Console");
             match(".");
             if (Contenido == "WriteLine")
             {
                 match("WriteLine");
+                match("(");
+                texto = Contenido;
+                texto = texto.Replace("\"", "");
+                asm.Write("\tPRINT_STRING ");
+                asm.WriteLine(texto);
+
             }
             else
             {
-                match("Write");
+                match("WriteLine");
+                match("(");
+                texto = Contenido;
+                texto = texto.Replace("\"", "");
+                asm.Write("\tPRINT_STRING ");
+                asm.Write(texto);
             }
-            match("(");
+            //match("(");
             if (Clasificacion == Tipos.Cadena)
             {
                 match(Tipos.Cadena);
