@@ -10,7 +10,7 @@ using System.Net.Http.Headers;
 
 /*
     1. Completar asignación               --> Listo
-    2. Console.Write & Console.WriteLine  --> 
+    2. Console.Write & Console.WriteLine  --> Listo
     3. Console.Read & Console.ReadLine    --> 
     4. Considerar else en el If           --> Creo que ya
     5. Programar el while                 -->
