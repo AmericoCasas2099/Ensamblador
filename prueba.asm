@@ -4,6 +4,7 @@ Analizador léxico
 Analizador Sintactico
 Analizador Semántico
 
+%include 'io.inc'
 extern fflush
 extern printf
 extern scanf
@@ -13,12 +14,18 @@ segment .text
 	global main
 
 main:
-	push ebp
-	mov ebp, esp
-	push msg1
+; Asignacion a x
+	mov eax, 2
+	push eax
+	pop eax
+	mov dword [x], eax
+	PRINT_STRING msg1
+	PRINT_STRING msg2
+	mov eax, [x]
+	push eax
+	push format
 	call printf
-	mov esp, ebp
-	pop ebp
+	PRINT_STRING msg3
 	add esp, 4
 
 	mov eax, 1
@@ -26,4 +33,9 @@ main:
 	int 0x80
 
 segment .data
-	msg1 db ")", 0
+
+format db "%d", 0
+	x db 0
+	msg1 db "Holaa " ,0
+	msg2 db "amigo " ,0
+	msg3 db "xd" ,13, 0

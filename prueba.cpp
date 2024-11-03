@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-
-   Console.WriteLine("Holaa");
+ int x;
+ x=2;
+   Console.WriteLine("Holaa "+"amigo "+x+"xd");
 }
