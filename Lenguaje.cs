@@ -23,7 +23,7 @@ namespace Ensamblador
     {
         private List<Variable> listaVariables;
 
-        private int cIFs, cDoes, cWhiles, cElses,cFor;
+        private int cIFs, cDoes, cWhiles, cElses, cFor, cMsg;
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
@@ -31,7 +31,7 @@ namespace Ensamblador
             asm.WriteLine("Analizador Semántico");
             listaVariables = new List<Variable>();
 
-            cIFs = cElses = cDoes= cFor = 1;
+            cIFs = cElses = cDoes = cWhiles = cFor = cMsg = 1;
         }
         public Lenguaje(string nombre) : base(nombre)
         {
@@ -39,7 +39,7 @@ namespace Ensamblador
             asm.WriteLine("; Analizador Sintactico");
             asm.WriteLine("; Analizador Semantico");
             listaVariables = new List<Variable>();
-            cIFs = cElses = cDoes= cFor = 1;
+            cIFs = cElses = cDoes = cWhiles = cFor = cMsg = 1;
             //Por cada if, debe generar una etiqueta
         }
         public void Programa()
@@ -93,36 +93,40 @@ namespace Ensamblador
         {
             log.WriteLine("Lista de variables");
             asm.WriteLine("\nsegment .data");
+            
             foreach (Variable v in listaVariables)
             {
-                // log.WriteLine(v.getNombre() + " (" + v.getTipo() + ") = " + v.getValor());
                 if (v.Tipo == Variable.TipoDato.Char)
                 {
-                    asm.WriteLine("\t" + v.Nombre + " db 0");
+                    if (v.Texto != "")
+                        if (v.Wrt == true)
+                            asm.WriteLine("\t" + v.Nombre + " db \"" + v.Texto + "\", 0");
+                        else
+                            asm.WriteLine("\t" + v.Nombre + " db \"" + v.Texto + "\", 13, 0");
                 }
+
+                
                 else if (v.Tipo == Variable.TipoDato.Int)
                 {
-                    asm.WriteLine("\t" + v.Nombre + " dd 0");
+                    asm.WriteLine("\t" + v.Nombre + " dd " + v.Texto + "0");
                 }
                 else
                 {
-                    asm.WriteLine("\t" + v.Nombre + " dw 0 ");
+                    asm.WriteLine("\t" + v.Nombre + " dw " + v.Texto + "0 ");
                 }
+
             }
+
         }
-        // ListaIdentificadores -> identificador (,ListaIdentificadores)?
         private void listaIdentificadores(Variable.TipoDato t)
         {
-            //Requerimiento 2
             if (listaVariables.Exists(v => v.Nombre == Contenido))
             {
                 throw new Error("Semantico: la variable \"" + Contenido + "\" ya ha sido declarada; linea: " + linea, log);
             }
             listaVariables.Add(new Variable(Contenido, t));
             var variable = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
-            /*if(variable == null){
-                throw new Error("La variable \""+ Contenido + "\" no ha sido declarada; linea:"+linea,log);
-            }   */
+
             match(Tipos.Identificador);
             if (Contenido == "=")
             {
@@ -135,7 +139,6 @@ namespace Ensamblador
                 listaIdentificadores(t);
             }
         }
-        // BloqueInstrucciones -> { listaIntrucciones? }
         private void bloqueInstrucciones()
         {
             match("{");
@@ -216,11 +219,11 @@ namespace Ensamblador
                     else
                     {
                         match("ReadLine");
-  
-                        asm.WriteLine("mov eax, input_buffer");          
-                        asm.WriteLine("push eax");                       
-                        asm.WriteLine("call scanf");                     
-                        asm.WriteLine("mov dword ["+variable+"], input_buffer");
+
+                        asm.WriteLine("mov eax, input_buffer");
+                        asm.WriteLine("push eax");
+                        asm.WriteLine("call scanf");
+                        asm.WriteLine("mov dword [" + variable + "], input_buffer");
 
                     }
                     match("(");
@@ -418,7 +421,7 @@ namespace Ensamblador
         //          BloqueInstrucciones | Intruccion
         private void For()
         {
-            asm.WriteLine("; for"+ ++cFor);
+            asm.WriteLine("; for" + ++cFor);
             string etiquetaIni = "_ForIni" + cFor;
             string etiquetaFin = "_ForFin" + cFor;
             match("for");
@@ -446,38 +449,99 @@ namespace Ensamblador
         private void console()
         {
             string texto = "";
+            bool salto = false;
+            string etiquetaMsg = "msg" + cMsg++;
+
             match("Console");
             match(".");
             if (Contenido == "WriteLine")
             {
                 match("WriteLine");
-                match("(");
-                texto = Contenido;
-                texto = texto.Replace("\"", "");
-                asm.Write("\tPRINT_STRING ");
-                asm.WriteLine(texto);
 
             }
             else
             {
                 match("WriteLine");
-                match("(");
-                texto = Contenido;
-                texto = texto.Replace("\"", "");
-                asm.Write("\tPRINT_STRING ");
-                asm.Write(texto);
+                salto = true;
             }
-            //match("(");
+            match("(");
             if (Clasificacion == Tipos.Cadena)
             {
+                texto = Contenido;
                 match(Tipos.Cadena);
                 if (Contenido == "+")
                 {
+                    Console.Write(texto); //borrar
+
+                    listaVariables.Add(new Variable(etiquetaMsg, Variable.TipoDato.Char));
+                    var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == etiquetaMsg; });
+                    v.Texto = texto;
+                    v.Wrt = true;
+
+                    asm.WriteLine("\tpush ebp");
+                    asm.WriteLine("\tmov ebp, esp");
+                    asm.WriteLine("\tpush " + etiquetaMsg);
+
+                    asm.WriteLine("\tcall printf");
+                    asm.WriteLine("\tmov esp, ebp");
+                    asm.WriteLine("\tpop ebp");
+
                     listaConcatenacion();
                 }
+                else
+                {
+                    if (salto)
+                    {
+                        Console.Write(texto); //borrar
+                        texto = Contenido;
+                        listaVariables.Add(new Variable(etiquetaMsg, Variable.TipoDato.Char));
+                        var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == etiquetaMsg; });
+                        v.Texto = texto;
+                        v.Wrt = true;
+                        //v.Salto;
+                        asm.WriteLine("\tpush ebp");
+                        asm.WriteLine("\tmov ebp, esp");
+                        asm.WriteLine("\tpush " + etiquetaMsg);
+
+                        asm.WriteLine("\tcall printf");
+                        asm.WriteLine("\tmov esp, ebp");
+                        asm.WriteLine("\tpop ebp");
+                        /*
+                                               asm.WriteLine("mov eax, 4"); //Salto de linea
+                                               asm.WriteLine("mov ebx, 1");
+                                               asm.WriteLine("mov ecx, esp");
+                                               asm.WriteLine(" mov byte [esp], 10 ");
+                                               asm.WriteLine("mov edx, 1");
+                                               asm.WriteLine("int 0x80");*/
+
+
+                    }
+                    else
+                    {
+                        Console.Write(texto); //borrar
+                        texto = Contenido;
+                        listaVariables.Add(new Variable(etiquetaMsg, Variable.TipoDato.Char));
+                        var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == etiquetaMsg; });
+                        v.Texto = texto;
+                        v.Wrt = true;
+                        //v.Salto;
+                        asm.WriteLine("\tpush ebp");
+                        asm.WriteLine("\tmov ebp, esp");
+                        asm.WriteLine("\tpush " + etiquetaMsg);
+
+                        asm.WriteLine("\tcall printf");
+                        asm.WriteLine("\tmov esp, ebp");
+                        asm.WriteLine("\tpop ebp");
+                    }
+
+                }
+                match(")");
+                match(";");
             }
-            match(")");
-            match(";");
+            else if (Clasificacion == Tipos.Identificador)
+            {
+
+            }
         }
 
         string listaConcatenacion()
@@ -516,8 +580,8 @@ namespace Ensamblador
             asm.WriteLine("extern scanf");
             asm.WriteLine("extern stdout");
             asm.WriteLine("\nsegment .text");
-            asm.WriteLine("\tglobal _main");
-            asm.WriteLine("\n_main:");
+            asm.WriteLine("\tglobal main");
+            asm.WriteLine("\nmain:");
         }
         private void asm_endMain()
         {

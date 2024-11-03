@@ -15,6 +15,9 @@ namespace Ensamblador
         private string nombre="";
         private TipoDato tipo;
         private float valor;
+        private string texto ="";
+        private bool salto = false;
+        private bool wrt = false;
 
         public Variable(string nombre, TipoDato tipo)
         {
@@ -35,5 +38,19 @@ namespace Ensamblador
         public TipoDato Tipo{
             get;
         }
+        
+        public string Texto{
+            set  => texto=value;
+            get => texto;
+        }
+        public bool Salto{
+            set => salto=value;
+            get => salto;
+        }
+
+        public bool Wrt{
+            set => wrt=value;
+            get => wrt;
         }
     }
+}
