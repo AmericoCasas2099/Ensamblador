@@ -13,8 +13,8 @@ using System.Net.Http.Headers;
     2. Console.Write & Console.WriteLine  --> Listo
     3. Console.Read & Console.ReadLine    --> 
     4. Considerar else en el If           --> Listo
-    5. Programar el while                 -->
-    6. Programar el for                   -->
+    5. Programar el while                 --> Listo
+    6. Programar el for                   --> 
 */
 
 namespace Ensamblador
@@ -22,9 +22,12 @@ namespace Ensamblador
     public class Lenguaje : Sintaxis
     {
         private List<Variable> listaVariables;
+        private Variable.TipoDato tipoDatoExpresion;
+
         private List<Msg> listaMsg = new List<Msg>();
 
         private int cIFs, cDoes, cWhiles, cElses, cFor, cMsg;
+        private bool esDoe = false;
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
@@ -74,7 +77,7 @@ namespace Ensamblador
                 listaLibrerias();
             }
         }
-        Variable.TipoDato getTipo(string TipoDato)
+        Variable.TipoDato getTipo(String TipoDato)
         {
             Variable.TipoDato tipo = Variable.TipoDato.Char;
             switch (TipoDato)
@@ -96,7 +99,7 @@ namespace Ensamblador
         {
             log.WriteLine("Lista de variables");
             asm.WriteLine("\nsegment .data");
-            asm.WriteLine("\nformat db " + '"' + "%d" + '"' + ", 0");
+            asm.WriteLine("\ntipo db " + '"' + "%d" + '"' + ", 0");
             foreach (Variable v in listaVariables)
             {
                 log.WriteLine(v.Nombre + " (" + v.Tipo + ") = " + v.Valor);
@@ -225,16 +228,23 @@ namespace Ensamblador
                     if (Contenido == "Read")
                     {
                         match("Read");
+                        asm.WriteLine("\tpush input");
+                        asm.WriteLine("\tpush tipo");
+                        asm.WriteLine("\tcall scanf");
+                        asm.WriteLine("\tadd esp, 8");
+                        asm.WriteLine("\tmov eax, [input]");
+                        asm.WriteLine("\tmov dword[" + v.Nombre + "], eax");
 
                     }
                     else
                     {
                         match("ReadLine");
-
-                        asm.WriteLine("mov eax, input_buffer");
-                        asm.WriteLine("push eax");
-                        asm.WriteLine("call scanf");
-                        asm.WriteLine("mov dword [" + variable + "], input_buffer");
+                        asm.WriteLine("\tpush input");
+                        asm.WriteLine("\tpush tipo");
+                        asm.WriteLine("\tcall scanf");
+                        asm.WriteLine("\tadd esp, 8");
+                        asm.WriteLine("\tmov eax, [input]");
+                        asm.WriteLine("\tmov dword[" + v.Nombre + "], eax");
 
                     }
                     match("(");
@@ -258,7 +268,7 @@ namespace Ensamblador
             else if (Contenido == "--")
             {
                 match("--");
-                asm.WriteLine("\tdec " + variable);
+                asm.WriteLine("\tdec dword [" + variable + "]");
                 nuevoValor--;
             }
             else if (Contenido == "+=")
@@ -349,7 +359,7 @@ namespace Ensamblador
             }
             asm.WriteLine(EndIf + ":");
         }
-             
+
         private void Condicion(string etiqueta)
         {
             Expresion(); // E1
@@ -359,34 +369,62 @@ namespace Ensamblador
             asm.WriteLine("\tpop eax");
             asm.WriteLine("\tpop ebx");
             asm.WriteLine("\tcmp eax, ebx");
-            switch (operador)
+            if (esDoe)
             {
-                 case ">":
-                    asm.WriteLine("\tjge " + etiqueta);
-                    break;
-                case ">=":
-                    asm.WriteLine("\tjg " + etiqueta);
-                    break;
-                case "<":
-                    asm.WriteLine("\tjle " + etiqueta);
-                    break;
-                case "<=":
-                    asm.WriteLine("\tjl " + etiqueta);
-                    break;
-                case "==":
-                    asm.WriteLine("\tjne " + etiqueta);
-                    break;
-                default:
-                    asm.WriteLine("\tje " + etiqueta);
-                    break;
+
+                switch (operador)
+                {
+                    case ">":
+                        asm.WriteLine("\tjle " + etiqueta);
+                        break;
+                    case ">=":
+                        asm.WriteLine("\tjl " + etiqueta);
+                        break;
+                    case "<":
+                        asm.WriteLine("\tjge " + etiqueta);
+                        break;
+                    case "<=":
+                        asm.WriteLine("\tjg " + etiqueta);
+                        break;
+                    case "==":
+                        asm.WriteLine("\tjne " + etiqueta);
+                        break;
+                    default:
+                        asm.WriteLine("\tje " + etiqueta);
+                        break;
+                }
+            }
+            else
+            {
+                switch (operador)
+                {
+                    case ">":
+                        asm.WriteLine("\tjge " + etiqueta);
+                        break;
+                    case ">=":
+                        asm.WriteLine("\tjg " + etiqueta);
+                        break;
+                    case "<":
+                        asm.WriteLine("\tjle " + etiqueta);
+                        break;
+                    case "<=":
+                        asm.WriteLine("\tjl " + etiqueta);
+                        break;
+                    case "==":
+                        asm.WriteLine("\tjne " + etiqueta);
+                        break;
+                    default:
+                        asm.WriteLine("\tje " + etiqueta);
+                        break;
+                }
             }
         }
         // While -> while(Condicion) bloqueInstrucciones | instruccion
         private void While()
         {
-            asm.WriteLine("; while " + ++cWhiles);
+            asm.WriteLine("; while " + cWhiles);
             string etiquetaIni = "_whileIni" + cWhiles;
-            string etiquetaFin = "_whileFin" + cWhiles;
+            string etiquetaFin = "_whileFin" + cWhiles++;
             match("while");
             match("(");
             asm.WriteLine(etiquetaIni + ":");
@@ -409,6 +447,7 @@ namespace Ensamblador
             asm.WriteLine("; do " + cDoes);
             string etiqueta = "_do" + cDoes++;
             asm.WriteLine(etiqueta + ":");
+            esDoe = true;
             match("do");
             if (Contenido == "{")
             {
@@ -423,21 +462,26 @@ namespace Ensamblador
             Condicion(etiqueta);
             match(")");
             match(";");
+            esDoe = false;
         }
 
         private void For()
         {
-            asm.WriteLine("; for" + ++cFor);
+            asm.WriteLine("; for" + cFor);
             string etiquetaIni = "_ForIni" + cFor;
             string etiquetaFin = "_ForFin" + cFor;
+            string etiquetaC = "_CondicionFor" + cFor;
+            string etiquetaA = "_AsignacionFor" + cFor;
+            string etiquetaO = "_OperacionFor" + cFor++;
+
             match("for");
             match("(");
-            asm.WriteLine(etiquetaIni + ":");
             Asignacion();
+            asm.WriteLine(etiquetaIni + ":");
             match(";");
             Condicion(etiquetaFin);
             match(";");
-            Asignacion();
+            //Asignacion();
             match(")");
             if (Contenido == "{")
             {
@@ -470,21 +514,20 @@ namespace Ensamblador
             else if (Contenido == "ReadLine")
             {
                 match("ReadLine");
+                asm.WriteLine("push [" + Contenido + "]");
+                asm.WriteLine("push tipo");
+                asm.WriteLine("call scanf");
 
-                asm.WriteLine("; Console.ReadLine");
-                asm.WriteLine("Call _getline");
-                asm.WriteLine("mov eax, retorno_de_getline");
-                
-                
+
             }
             else if (Contenido == "Read")
             {
                 match("Read");
-                asm.WriteLine("; Console.Read");
-                asm.WriteLine("Call _getchar");
-                asm.WriteLine("mov eax, al");
-                
-                
+                asm.WriteLine("push [" + Contenido + "]");
+                asm.WriteLine("push tipo");
+                asm.WriteLine("call scanf");
+
+
             }
 
             string texto;
@@ -503,7 +546,7 @@ namespace Ensamblador
             {
                 asm.WriteLine("\tmov eax, [" + Contenido + "]");
                 asm.WriteLine("\tpush eax");
-                asm.WriteLine("\tpush format");
+                asm.WriteLine("\tpush tipo");
                 asm.WriteLine("\tcall printf");
                 match(Tipos.Identificador);
 
@@ -515,10 +558,9 @@ namespace Ensamblador
             match(")");
             listaMsg[cMsg - 2].Salto = sLn;
             match(";");
-           /* if (sLn == true)
-            {
-                asm.WriteLine("\tPRINT_STRING salto");
-            }*/
+            /* if (sLn == true)
+             {
+             }*/
         }
 
 
@@ -636,7 +678,7 @@ namespace Ensamblador
                 // resultado = v.Valor.ToString();
                 asm.WriteLine("\tmov eax, [" + v.Nombre + "]");
                 asm.WriteLine("\tpush eax");
-                asm.WriteLine("\tpush format"); //borrar
+                asm.WriteLine("\tpush tipo"); 
                 asm.WriteLine("\tcall printf");
                 match(Tipos.Identificador);
             }
@@ -663,6 +705,8 @@ namespace Ensamblador
             asm.WriteLine("extern printf");
             asm.WriteLine("extern scanf");
             asm.WriteLine("extern stdout");
+            asm.WriteLine("\nsection .bss");
+            asm.WriteLine("\tinput resd 1");
             asm.WriteLine("\nsegment .text");
             asm.WriteLine("\tglobal main");
             asm.WriteLine("\nmain:");
@@ -765,7 +809,7 @@ namespace Ensamblador
             else if (Clasificacion == Tipos.Identificador)
             {
                 var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
-                asm.WriteLine("\tmov eax, [" + Contenido+"]");
+                asm.WriteLine("\tmov eax, [" + Contenido + "]");
                 asm.WriteLine("\tpush eax");
                 match(Tipos.Identificador);
             }

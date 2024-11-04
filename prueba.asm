@@ -10,37 +10,26 @@ extern printf
 extern scanf
 extern stdout
 
+section .bss
+	input resd 1
+
 segment .text
 	global main
 
 main:
 ; Asignacion a x
-	mov eax, 2
-	push eax
-	pop eax
-	mov dword [x], eax
-	mov eax, [x]
-	push eax
-	push format
-	call printf
+	push input
+	push tipo
+	call scanf
+	add esp, 8
+	mov eax, [input]
+	mov dword[x], eax
 	PRINT_STRING msg1
-; if 1
 	mov eax, [x]
 	push eax
-	mov eax, 3
-	push eax
-	pop eax
-	pop ebx
-	cmp eax, ebx
-	jge _else1
-; Asignacion a x
-	mov eax, 0
-	push eax
-	pop eax
-	mov dword [x], eax
-	jmp _endIf1
-_else1:
-_endIf1:
+	push tipo
+	call printf
+	PRINT_STRING msg2
 	add esp, 4
 
 	mov eax, 1
@@ -49,6 +38,7 @@ _endIf1:
 
 segment .data
 
-format db "%d", 0
+tipo db "%d", 0
 	x db 0
-	msg1 db "" ,13, 0
+	msg1 db "x es igual a: " ,0
+	msg2 db "" ,13, 0

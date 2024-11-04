@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 static void Main(string[] args)
 {
  int x;
- x=2;
- Console.WriteLine(x+"");
-   if(x>3){
-      x=0;
-      
-   }/*
+  
+  x=Console.ReadLine();
+  Console.WriteLine("x es igual a: " + x+"");
+
+/*
+for(x = 0; x < 4; x++)
+  {
+    Console.WriteLine("x es igual a: " + x+"");
+  }
    else{
       x=1;
    }
