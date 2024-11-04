@@ -19,13 +19,28 @@ main:
 	push eax
 	pop eax
 	mov dword [x], eax
-	PRINT_STRING msg1
-	PRINT_STRING msg2
 	mov eax, [x]
 	push eax
 	push format
 	call printf
-	PRINT_STRING msg3
+	PRINT_STRING msg1
+; if 1
+	mov eax, [x]
+	push eax
+	mov eax, 3
+	push eax
+	pop eax
+	pop ebx
+	cmp eax, ebx
+	jge _else1
+; Asignacion a x
+	mov eax, 0
+	push eax
+	pop eax
+	mov dword [x], eax
+	jmp _endIf1
+_else1:
+_endIf1:
 	add esp, 4
 
 	mov eax, 1
@@ -36,6 +51,4 @@ segment .data
 
 format db "%d", 0
 	x db 0
-	msg1 db "Holaa " ,0
-	msg2 db "amigo " ,0
-	msg3 db "xd" ,13, 0
+	msg1 db "" ,13, 0

@@ -12,7 +12,7 @@ using System.Net.Http.Headers;
     1. Completar asignación               --> Listo
     2. Console.Write & Console.WriteLine  --> Listo
     3. Console.Read & Console.ReadLine    --> 
-    4. Considerar else en el If           --> Creo que ya
+    4. Considerar else en el If           --> Listo
     5. Programar el while                 -->
     6. Programar el for                   -->
 */
@@ -315,16 +315,14 @@ namespace Ensamblador
         private void If()
         {
             bool elseExiste = false;
-            asm.WriteLine("_if" + cIFs);
-            string etiqueta = "_if" + cIFs++;
-            string etiqueta2 = "_else" + cElses++;
-            string etiquetaFin = "_finIf" + cIFs;
+            asm.WriteLine("; if " + cIFs);
+            string etqElse = "_else" + cIFs;
+            string EndIf = "_endIf" + cIFs++;
             match("if");
             match("(");
-            Condicion(etiqueta);
+            Condicion(etqElse);
             match(")");
 
-            //asm.WriteLine("jz " + etiqueta2);
             if (Contenido == "{")
             {
                 bloqueInstrucciones();
@@ -333,13 +331,13 @@ namespace Ensamblador
             {
                 Instruccion();
             }
-            //asm.WriteLine("jmp " + etiquetaFin);
-            asm.WriteLine(etiqueta);
+            asm.WriteLine("\tjmp " + EndIf);
+            asm.WriteLine(etqElse + ":");
+
             if (Contenido == "else")
             {
-                asm.WriteLine(etiqueta2 + ":");
-                match("else");
                 elseExiste = true;
+                match("else");
                 if (Contenido == "{")
                 {
                     bloqueInstrucciones();
@@ -348,11 +346,10 @@ namespace Ensamblador
                 {
                     Instruccion();
                 }
-                asm.WriteLine(etiqueta2);
             }
-            asm.WriteLine(etiqueta);
-            //Generar etiqueta para que la condición diga a que etiqueta saltar
+            asm.WriteLine(EndIf + ":");
         }
+             
         private void Condicion(string etiqueta)
         {
             Expresion(); // E1
@@ -364,17 +361,17 @@ namespace Ensamblador
             asm.WriteLine("\tcmp eax, ebx");
             switch (operador)
             {
-                case ">":
-                    asm.WriteLine("\tjle " + etiqueta);
-                    break;
-                case ">=":
-                    asm.WriteLine("\tjl " + etiqueta);
-                    break;
-                case "<":
+                 case ">":
                     asm.WriteLine("\tjge " + etiqueta);
                     break;
-                case "<=":
+                case ">=":
                     asm.WriteLine("\tjg " + etiqueta);
+                    break;
+                case "<":
+                    asm.WriteLine("\tjle " + etiqueta);
+                    break;
+                case "<=":
+                    asm.WriteLine("\tjl " + etiqueta);
                     break;
                 case "==":
                     asm.WriteLine("\tjne " + etiqueta);
@@ -382,7 +379,6 @@ namespace Ensamblador
                 default:
                     asm.WriteLine("\tje " + etiqueta);
                     break;
-
             }
         }
         // While -> while(Condicion) bloqueInstrucciones | instruccion
@@ -428,8 +424,7 @@ namespace Ensamblador
             match(")");
             match(";");
         }
-        // For -> for(Asignacion Condicion; Incremento) 
-        //          BloqueInstrucciones | Intruccion
+
         private void For()
         {
             asm.WriteLine("; for" + ++cFor);
@@ -749,7 +744,7 @@ namespace Ensamblador
             else if (Clasificacion == Tipos.Identificador)
             {
                 var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
-                asm.WriteLine("\tmov eax, " + Contenido);
+                asm.WriteLine("\tmov eax, [" + Contenido+"]");
                 asm.WriteLine("\tpush eax");
                 match(Tipos.Identificador);
             }
