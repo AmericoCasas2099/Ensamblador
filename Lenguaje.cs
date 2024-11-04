@@ -463,10 +463,30 @@ namespace Ensamblador
                 sLn = true;
 
             }
-            else
+            else if (Contenido == "write")
             {
                 match("Write");
             }
+            else if (Contenido == "ReadLine")
+            {
+                match("ReadLine");
+
+                asm.WriteLine("; Console.ReadLine");
+                asm.WriteLine("Call _getline");
+                asm.WriteLine("mov eax, retorno_de_getline");
+                
+                
+            }
+            else if (Contenido == "Read")
+            {
+                match("Read");
+                asm.WriteLine("; Console.Read");
+                asm.WriteLine("Call _getchar");
+                asm.WriteLine("mov eax, al");
+                
+                
+            }
+
             string texto;
             match("(");
             if (Clasificacion == Tipos.Cadena)
@@ -500,6 +520,7 @@ namespace Ensamblador
                 asm.WriteLine("\tPRINT_STRING salto");
             }*/
         }
+
 
 
 
