@@ -11,7 +11,7 @@ using System.Net.Http.Headers;
 /*
     1. Completar asignación               --> Listo
     2. Console.Write & Console.WriteLine  --> Listo
-    3. Console.Read & Console.ReadLine    --> 
+    3. Console.Read & Console.ReadLine    --> Listo
     4. Considerar else en el If           --> Listo
     5. Programar el while                 --> Listo
     6. Programar el for                   --> 
@@ -464,7 +464,51 @@ namespace Ensamblador
             match(";");
             esDoe = false;
         }
-
+        private string operacionFor(string nombreV){
+            string resultado;
+             match(Tipos.Identificador);
+            if (Contenido == "++")
+            {
+                match("++");
+                resultado = "\tinc dword [" + nombreV + "]";
+            }
+            else if(Contenido == "--")
+            {
+                match("--");
+                resultado = "\tdec dword [" + nombreV + "]";
+            }
+            else if(Contenido == "+=")
+            {
+                match("+=");
+                Expresion();
+                resultado = "\tpop eax\n\tadd [" + nombreV + "], eax";
+            }
+            else if(Contenido == "-=")
+            {
+                match("-=");
+                Expresion();
+                resultado = "\tpop eax\n\tsub [" + nombreV + "], eax";
+            }
+            else if(Contenido == "*=")
+            {
+                match("*=");
+                Expresion();
+                resultado = "\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\timul eax, ebx\n\tmov dword [" + nombreV + "], eax";
+            }
+            else if(Contenido == "/=")
+            {
+                match("/=");
+                Expresion();
+                resultado = "\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\tidiv ebx\n\tmov dword [" + nombreV + "], eax";
+            }
+            else
+            {
+                match("%=");
+                Expresion();
+                resultado = "\txor edx, edx\n\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\tidiv ebx\n\tmov dword [" + nombreV + "], edx";
+            }
+            return resultado;
+        }
         private void For()
         {
             asm.WriteLine("; for" + cFor);
@@ -473,15 +517,20 @@ namespace Ensamblador
             string etiquetaC = "_CondicionFor" + cFor;
             string etiquetaA = "_AsignacionFor" + cFor;
             string etiquetaO = "_OperacionFor" + cFor++;
+            string resultado;
 
             match("for");
             match("(");
+            asm.WriteLine(";"+etiquetaA + ":");
             Asignacion();
             asm.WriteLine(etiquetaIni + ":");
             match(";");
+            asm.WriteLine(";"+etiquetaC + ":");
             Condicion(etiquetaFin);
             match(";");
-            //Asignacion();
+            var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
+            
+            resultado = operacionFor(v.Nombre);
             match(")");
             if (Contenido == "{")
             {
@@ -491,6 +540,8 @@ namespace Ensamblador
             {
                 Instruccion();
             }
+            asm.WriteLine(";"+etiquetaO + ":");
+            asm.WriteLine(resultado);
             asm.WriteLine("jmp " + etiquetaIni);
             asm.WriteLine(etiquetaFin + ":");
         }
@@ -678,7 +729,7 @@ namespace Ensamblador
                 // resultado = v.Valor.ToString();
                 asm.WriteLine("\tmov eax, [" + v.Nombre + "]");
                 asm.WriteLine("\tpush eax");
-                asm.WriteLine("\tpush tipo"); 
+                asm.WriteLine("\tpush tipo");
                 asm.WriteLine("\tcall printf");
                 match(Tipos.Identificador);
             }

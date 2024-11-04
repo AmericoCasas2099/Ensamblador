@@ -18,18 +18,22 @@ segment .text
 
 main:
 ; Asignacion a x
-	push input
-	push tipo
-	call scanf
-	add esp, 8
-	mov eax, [input]
-	mov dword[x], eax
-	PRINT_STRING msg1
+	mov eax, 4
+	push eax
+	pop eax
+	mov dword [x], eax
+; Asignacion a x
+	mov eax, 2
+	push eax
+	pop eax
+	mov ebx, dword [x]
+	idiv ebx
+	mov dword [x], eax
 	mov eax, [x]
 	push eax
 	push tipo
 	call printf
-	PRINT_STRING msg2
+	PRINT_STRING msg1
 	add esp, 4
 
 	mov eax, 1
@@ -40,5 +44,4 @@ segment .data
 
 tipo db "%d", 0
 	x db 0
-	msg1 db "x es igual a: " ,0
-	msg2 db "" ,13, 0
+	msg1 db "" ,13, 0
