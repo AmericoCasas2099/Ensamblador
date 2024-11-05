@@ -72,7 +72,7 @@ Console.Write("Valor de x: "+x);
 for(x = 0; x < 4; x++)
   {
     Console.WriteLine("x es igual a: " + x+"");
-  } 
+  }/*
    else{
       x=1;
    }

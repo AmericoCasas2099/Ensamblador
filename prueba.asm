@@ -3,12 +3,18 @@
 ;Analizador léxico
 ;Analizador Sintactico
 ;Analizador Semántico
+;Autores: Luis Américo Casas Vázquez,
+;Habid Hazel Avitud Cruz
+;Analizador léxico
+;Analizador Sintactico
+;Analizador Semántico
 
 %include 'io.inc'
 extern fflush
 extern printf
 extern scanf
 extern stdout
+extern fgets
 
 section .bss
 	input resd 1
