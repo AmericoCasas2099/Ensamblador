@@ -1,8 +1,8 @@
-Autores: Luis Américo Casas Vázquez,
-Habid Hazel Avitud Cruz
-Analizador léxico
-Analizador Sintactico
-Analizador Semántico
+;Autores: Luis Américo Casas Vázquez,
+;Habid Hazel Avitud Cruz
+;Analizador léxico
+;Analizador Sintactico
+;Analizador Semántico
 
 %include 'io.inc'
 extern fflush
@@ -23,6 +23,42 @@ main:
 	push eax
 	pop eax
 	mov dword [x], eax
+	mov eax, [x]
+	push eax
+	push tipo
+	call printf
+	NEWLINE
+; Asignacion a x
+	mov eax, 2
+	push eax
+	pop ebx
+	mov eax, [x]
+	xor edx, edx
+	idiv ebx
+	mov dword [x], edx
+	mov eax, [x]
+	push eax
+	push tipo
+	call printf
+	NEWLINE
+; Asignacion a x
+	mov eax, 4
+	push eax
+	pop eax
+	mov dword [x], eax
+; Asignacion a x
+	mov eax, 2
+	push eax
+	pop ecx
+	mov eax, [x]
+	xor edx, edx
+	div ecx
+	mov dword [x], eax
+	mov eax, [x]
+	push eax
+	push tipo
+	call printf
+	NEWLINE
 	mov eax, [x]
 	push eax
 	push tipo

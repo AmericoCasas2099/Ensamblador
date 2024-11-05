@@ -59,8 +59,8 @@ namespace Ensamblador{
             asm = new StreamWriter(Path.GetFileNameWithoutExtension(nombre) + ".asm");
             asm.AutoFlush = true;
             log.WriteLine("Analizador Lexico");
-            asm.WriteLine("Autores: Luis Américo Casas Vázquez,\nHabid Hazel Avitud Cruz");
-            asm.WriteLine("Analizador léxico");
+            asm.WriteLine(";Autores: Luis Américo Casas Vázquez,\n;Habid Hazel Avitud Cruz");
+            asm.WriteLine(";Analizador léxico");
 
             if (Path.GetExtension(nombre) != ".cpp")
             {

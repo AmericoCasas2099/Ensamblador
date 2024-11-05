@@ -7,11 +7,18 @@ static void Main(string[] args)
 {
  int x;
  x=4;
+ Console.WriteLine(x);
+ x%=2;
+ Console.WriteLine(x);
+ x=4;
+ x/=2;
+ Console.WriteLine(x);
 // x = 4/2;
 Console.WriteLine(x);
 Console.WriteLine("Caa");
 Console.Read(x);
 Console.WriteLine(x);
+
 
 for(x = 0; x < 4; x++)
   {

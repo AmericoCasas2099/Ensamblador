@@ -31,8 +31,8 @@ namespace Ensamblador
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
-            asm.WriteLine("Analizador Sintactico");
-            asm.WriteLine("Analizador Semántico");
+            asm.WriteLine(";Analizador Sintactico");
+            asm.WriteLine(";Analizador Semántico");
             listaVariables = new List<Variable>();
             listaMsg = new List<Msg>();
 
@@ -291,21 +291,20 @@ namespace Ensamblador
             {
                 match("/=");
                 Expresion();
-                asm.WriteLine("\tpop eax");
-                asm.WriteLine("\tmov ecx, eax");
-                asm.WriteLine("\tmov eax, " + "[" + variable + "]");
-                asm.WriteLine("\txor edx,edx");
-                asm.WriteLine("\tdiv ecx");
+                asm.WriteLine("\tpop ecx");            
+                asm.WriteLine("\tmov eax, [" + variable + "]");
+                asm.WriteLine("\txor edx, edx");       
+                asm.WriteLine("\tdiv ecx");            
                 asm.WriteLine("\tmov dword [" + variable + "], eax");
             }
             else if (Contenido == "%=")
             {
                 match("%=");
                 Expresion();
-                asm.WriteLine("\txor edx, edx");
-                asm.WriteLine("\tpop eax");
-                asm.WriteLine("\tmov ebx, dword [" + variable + "]");
-                asm.WriteLine("\tidiv ebx");
+                asm.WriteLine("\tpop ebx");            
+                asm.WriteLine("\tmov eax, [" + variable + "]"); 
+                asm.WriteLine("\txor edx, edx");       
+                asm.WriteLine("\tidiv ebx");          
                 asm.WriteLine("\tmov dword [" + variable + "], edx");
             }
             // match(";");
