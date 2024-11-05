@@ -455,75 +455,27 @@ namespace Ensamblador
             match(";");
             esDoe = false;
         }
-        private string operacionFor(string nombreV)
-        {
-            string resultado;
-            match(Tipos.Identificador);
-            if (Contenido == "++")
-            {
-                match("++");
-                resultado = "\tinc dword [" + nombreV + "]";
-            }
-            else if (Contenido == "--")
-            {
-                match("--");
-                resultado = "\tdec dword [" + nombreV + "]";
-            }
-            else if (Contenido == "+=")
-            {
-                match("+=");
-                Expresion();
-                resultado = "\tpop eax\n\tadd [" + nombreV + "], eax";
-            }
-            else if (Contenido == "-=")
-            {
-                match("-=");
-                Expresion();
-                resultado = "\tpop eax\n\tsub [" + nombreV + "], eax";
-            }
-            else if (Contenido == "*=")
-            {
-                match("*=");
-                Expresion();
-                resultado = "\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\timul eax, ebx\n\tmov dword [" + nombreV + "], eax";
-            }
-            else if (Contenido == "/=")
-            {
-                match("/=");
-                Expresion();
-                resultado = "\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\tidiv ebx\n\tmov dword [" + nombreV + "], eax";
-            }
-            else
-            {
-                match("%=");
-                Expresion();
-                resultado = "\txor edx, edx\n\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\tidiv ebx\n\tmov dword [" + nombreV + "], edx";
-            }
-            return resultado;
-        }
         private void For()
         {
             asm.WriteLine("; for" + cFor);
             string etiquetaIni = "_ForIni" + cFor;
             string etiquetaFin = "_ForFin" + cFor;
-            string etiquetaC = "_CondicionFor" + cFor;
-            string etiquetaA = "_AsignacionFor" + cFor;
-            string etiquetaO = "_OperacionFor" + cFor++;
-            string resultado;
+            string etiquetaIncremento = "_forIncremento" + cFor;
+            string etiquetaInstruction = "_forInstruction" + cFor;
 
             match("for");
             match("(");
-            asm.WriteLine(";" + etiquetaA + ":");
             Asignacion();
-            asm.WriteLine(etiquetaIni + ":");
             match(";");
-            asm.WriteLine(";" + etiquetaC + ":");
+            asm.WriteLine(etiquetaIni + ":");
             Condicion(etiquetaFin);
             match(";");
-            var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
-
-            resultado = operacionFor(v.Nombre);
+            asm.WriteLine("     jmp " + etiquetaInstruction);;
+            asm.WriteLine(etiquetaIncremento + ":");
+            Asignacion();
             match(")");
+            asm.WriteLine("     jmp " + etiquetaIni);
+            asm.WriteLine(etiquetaInstruction + ":");
             if (Contenido == "{")
             {
                 bloqueInstrucciones();
@@ -532,9 +484,7 @@ namespace Ensamblador
             {
                 Instruccion();
             }
-            asm.WriteLine(";" + etiquetaO + ":");
-            asm.WriteLine(resultado);
-            asm.WriteLine("jmp " + etiquetaIni);
+            asm.WriteLine("     jmp " + etiquetaIncremento); 
             asm.WriteLine(etiquetaFin + ":");
         }
 

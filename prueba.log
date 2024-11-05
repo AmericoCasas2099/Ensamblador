@@ -1,5 +1,7 @@
 Analizador Lexico
 Analizador Sintactico
 x = 0
+x = 0
+x = 1
 Lista de variables
-x (Char) = 0
+x (Char) = 1

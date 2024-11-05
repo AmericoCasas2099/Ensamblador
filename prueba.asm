@@ -29,6 +29,36 @@ main:
 	NEWLINE
 	PRINT_STRING msg1
 	NEWLINE
+; for1
+; Asignacion a x
+	mov eax, 0
+	push eax
+	pop eax
+	mov dword [x], eax
+_ForIni1:
+	mov eax, [x]
+	push eax
+	mov eax, 4
+	push eax
+	pop eax
+	pop ebx
+	cmp eax, ebx
+	jle _ForFin1
+     jmp _forInstruction1
+_forIncremento1:
+; Asignacion a x
+	inc dword [x]
+     jmp _ForIni1
+_forInstruction1:
+	PRINT_STRING msg2
+	mov eax, [x]
+	push eax
+	push tipo
+	call printf
+	PRINT_STRING msg3
+	NEWLINE
+     jmp _forIncremento1
+_ForFin1:
 	add esp, 4
 
 	mov eax, 1
@@ -40,3 +70,5 @@ segment .data
 tipo db "%d", 0
 	x db 0
 	msg1 db "Caa" ,0
+	msg2 db "x es igual a: " ,0
+	msg3 db "" ,0
