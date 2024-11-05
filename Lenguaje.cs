@@ -492,6 +492,8 @@ namespace Ensamblador
         private void console()
         {
             bool sLn = false;
+            bool RorWr = false;
+            bool RLine = false;
             match("Console");
             match(".");
             if (Contenido == "WriteLine")
@@ -507,26 +509,44 @@ namespace Ensamblador
             else if (Contenido == "ReadLine")
             {
                 match("ReadLine");
-                asm.WriteLine("push [" + Contenido + "]");
-                asm.WriteLine("push tipo");
-                asm.WriteLine("call scanf");
-
-
+                RorWr = true;
+                RLine = true;
             }
             else if (Contenido == "Read")
             {
                 match("Read");
-                asm.WriteLine("push [" + Contenido + "]");
-                asm.WriteLine("push tipo");
-                asm.WriteLine("call scanf");
-
-
+                RorWr = true;
             }
 
             string texto;
             match("(");
-            if (Clasificacion == Tipos.Cadena)
+            if(RorWr == true)
             {
+                if(RLine == true)
+                {
+                    asm.WriteLine("\tpush dword 0");
+                    asm.WriteLine("\tpush dword 100");
+                    asm.WriteLine("\tpush " + Contenido);
+                    asm.WriteLine("\tcall fgets");
+                    match(Tipos.Identificador);
+                }
+                else
+                {
+                    asm.WriteLine("\tpush " + Contenido);
+                    //asm.WriteLine("\tlea rdi, [%d]");
+                    asm.WriteLine("\tpush tipo");
+                    asm.WriteLine("\tcall scanf");
+                    match(Tipos.Identificador);
+                }
+                match(")");
+           
+                match(";");
+
+            }
+            else
+            {
+                 if (Clasificacion == Tipos.Cadena)
+                {
 
                 texto = Contenido.Replace("\"", "");
                 listaMsg.Add(new Msg(texto, "msg" + cMsg));
@@ -537,34 +557,29 @@ namespace Ensamblador
                 /*if(sLn == true){
                     asm.WriteLine("\tNEWLINE");
                 }*/
-            }
-            else
-            {
+                }
+                else
+                {
                 asm.WriteLine("\tmov eax, [" + Contenido + "]");
                 asm.WriteLine("\tpush eax");
                 asm.WriteLine("\tpush tipo");
                 asm.WriteLine("\tcall printf");
                 match(Tipos.Identificador);
 
-            }
-            if (Contenido == "+")
-            {
-                listaConcatenacion();
-            }
-            match(")");
+                }   
+                if (Contenido == "+")
+                {
+                    listaConcatenacion();
+                }
+                match(")");
             //listaMsg[cMsg - 2].Salto = sLn;
-            match(";");
-            if (sLn == true)
-             {
+                match(";");
+                if (sLn == true)
+                {
                 asm.WriteLine("\tNEWLINE");
-             }
+                }
+            }  
         }
-
-
-
-
-
-
         string listaConcatenacion()
         {
             String texto;
@@ -608,6 +623,7 @@ namespace Ensamblador
             asm.WriteLine("extern printf");
             asm.WriteLine("extern scanf");
             asm.WriteLine("extern stdout");
+            asm.WriteLine("extern fgets");
             asm.WriteLine("\nsection .bss");
             asm.WriteLine("\tinput resd 1");
             asm.WriteLine("\nsegment .text");

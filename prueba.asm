@@ -9,6 +9,7 @@ extern fflush
 extern printf
 extern scanf
 extern stdout
+extern fgets
 
 section .bss
 	input resd 1
@@ -28,6 +29,14 @@ main:
 	call printf
 	NEWLINE
 	PRINT_STRING msg1
+	NEWLINE
+	push x
+	push tipo
+	call scanf
+	mov eax, [x]
+	push eax
+	push tipo
+	call printf
 	NEWLINE
 ; for1
 ; Asignacion a x

@@ -10,6 +10,8 @@ static void Main(string[] args)
 // x = 4/2;
 Console.WriteLine(x);
 Console.WriteLine("Caa");
+Console.Read(x);
+Console.WriteLine(x);
 
 for(x = 0; x < 4; x++)
   {
