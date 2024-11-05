@@ -31,8 +31,8 @@ namespace Ensamblador
         public Lenguaje()
         {
             log.WriteLine("Analizador Sintactico");
-            asm.WriteLine("Analizador Sintactico");
-            asm.WriteLine("Analizador Semántico");
+            asm.WriteLine(";Analizador Sintactico");
+            asm.WriteLine(";Analizador Semántico");
             listaVariables = new List<Variable>();
             listaMsg = new List<Msg>();
 
@@ -98,7 +98,7 @@ namespace Ensamblador
         {
             log.WriteLine("Lista de variables");
             asm.WriteLine("\nsegment .data");
-            asm.WriteLine("\ntipo db " + '"' + "%d" + '"' + ", 0");
+            asm.WriteLine("\nsalida db " + '"' + "%d" + '"' + ", 0");
             foreach (Variable v in listaVariables)
             {
                 log.WriteLine(v.Nombre + " (" + v.Tipo + ") = " + v.Valor);
@@ -220,7 +220,7 @@ namespace Ensamblador
                     {
                         match("Read");
                         asm.WriteLine("\tpush input");
-                        asm.WriteLine("\tpush tipo");
+                        asm.WriteLine("\tpush salida");
                         asm.WriteLine("\tcall scanf");
                         asm.WriteLine("\tadd esp, 8");
                         asm.WriteLine("\tmov eax, [input]");
@@ -231,7 +231,7 @@ namespace Ensamblador
                     {
                         match("ReadLine");
                         asm.WriteLine("\tpush input");
-                        asm.WriteLine("\tpush tipo");
+                        asm.WriteLine("\tpush salida");
                         asm.WriteLine("\tcall scanf");
                         asm.WriteLine("\tadd esp, 8");
                         asm.WriteLine("\tmov eax, [input]");
@@ -295,18 +295,27 @@ namespace Ensamblador
                 asm.WriteLine("\tmov ecx, eax");
                 asm.WriteLine("\tmov eax, " + "[" + variable + "]");
                 asm.WriteLine("\txor edx,edx");
-                asm.WriteLine("\tdiv ecx");
+                asm.WriteLine("\tcdq");
+                asm.WriteLine("\tidiv ecx");
                 asm.WriteLine("\tmov dword [" + variable + "], eax");
             }
             else if (Contenido == "%=")
             {
                 match("%=");
                 Expresion();
+                asm.WriteLine("\tpop eax");
+                asm.WriteLine("\tmov ecx, eax");
+                asm.WriteLine("\tmov eax, " + "[" + variable + "]");
+                asm.WriteLine("\txor edx,edx");
+                asm.WriteLine("\tcdq");
+                asm.WriteLine("\tidiv ecx");
+                asm.WriteLine("\tmov dword [" + variable + "], edx");
+                /*
                 asm.WriteLine("\txor edx, edx");
                 asm.WriteLine("\tpop eax");
                 asm.WriteLine("\tmov ebx, dword [" + variable + "]");
                 asm.WriteLine("\tidiv ebx");
-                asm.WriteLine("\tmov dword [" + variable + "], edx");
+                asm.WriteLine("\tmov dword [" + variable + "], edx");*/
             }
             // match(";");
             v.Valor = nuevoValor;
@@ -491,13 +500,13 @@ namespace Ensamblador
             {
                 match("/=");
                 Expresion();
-                resultado = "\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\tidiv ebx\n\tmov dword [" + nombreV + "], eax";
+                resultado = "\tpop eax\n\tmov ecx, eax\n\tmov eax, [" + nombreV + "]\n\tcdq\n\tidiv ecx\n\tmov dword [" + nombreV + "], eax";
             }
             else
             {
                 match("%=");
                 Expresion();
-                resultado = "\txor edx, edx\n\tpop eax\n\tmov ebx, dword [" + nombreV + "]\n\tidiv ebx\n\tmov dword [" + nombreV + "], edx";
+                resultado = "\tpop eax\n\tmov ecx, eax\n\tmov eax, [" + nombreV + "]\n\tcdq\n\tidiv ecx\n\tmov dword [" + nombreV + "], edx";
             }
             return resultado;
         }
@@ -550,7 +559,7 @@ namespace Ensamblador
                 sLn = true;
 
             }
-            else if (Contenido == "write")
+            else if (Contenido == "Write")
             {
                 match("Write");
             }
@@ -558,7 +567,7 @@ namespace Ensamblador
             {
                 match("ReadLine");
                 asm.WriteLine("push [" + Contenido + "]");
-                asm.WriteLine("push tipo");
+                asm.WriteLine("push salida");
                 asm.WriteLine("call scanf");
 
 
@@ -567,7 +576,7 @@ namespace Ensamblador
             {
                 match("Read");
                 asm.WriteLine("push [" + Contenido + "]");
-                asm.WriteLine("push tipo");
+                asm.WriteLine("push salida");
                 asm.WriteLine("call scanf");
 
 
@@ -592,7 +601,7 @@ namespace Ensamblador
             {
                 asm.WriteLine("\tmov eax, [" + Contenido + "]");
                 asm.WriteLine("\tpush eax");
-                asm.WriteLine("\tpush tipo");
+                asm.WriteLine("\tpush salida");
                 asm.WriteLine("\tcall printf");
                 match(Tipos.Identificador);
 
@@ -630,7 +639,7 @@ namespace Ensamblador
                 // resultado = v.Valor.ToString();
                 asm.WriteLine("\tmov eax, [" + v.Nombre + "]");
                 asm.WriteLine("\tpush eax");
-                asm.WriteLine("\tpush tipo");
+                asm.WriteLine("\tpush salida");
                 asm.WriteLine("\tcall printf");
                 match(Tipos.Identificador);
             }
@@ -740,11 +749,13 @@ namespace Ensamblador
                         asm.WriteLine("\tpush eax");
                         break;
                     case "/":
-                        asm.WriteLine("\tdiv ebx");
+                        asm.WriteLine("\tcdq");
+                        asm.WriteLine("\tidiv ebx");
                         asm.WriteLine("\tpush eax");
                         break;
                     case "%":
-                        asm.WriteLine("\tdiv ebx");
+                        asm.WriteLine("\tcdq");
+                        asm.WriteLine("\tidiv ebx");
                         asm.WriteLine("\tpush edx");
                         break;
                 }
