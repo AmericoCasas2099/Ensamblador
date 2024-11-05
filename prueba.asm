@@ -22,18 +22,13 @@ main:
 	push eax
 	pop eax
 	mov dword [x], eax
-; Asignacion a x
-	mov eax, 2
-	push eax
-	pop eax
-	mov ebx, dword [x]
-	idiv ebx
-	mov dword [x], eax
 	mov eax, [x]
 	push eax
 	push tipo
 	call printf
+	NEWLINE
 	PRINT_STRING msg1
+	NEWLINE
 	add esp, 4
 
 	mov eax, 1
@@ -44,4 +39,4 @@ segment .data
 
 tipo db "%d", 0
 	x db 0
-	msg1 db "" ,13, 0
+	msg1 db "Caa" ,0
