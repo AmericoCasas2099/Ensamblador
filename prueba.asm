@@ -128,13 +128,13 @@ main:
 segment .data
 
 salida db "%d", 0
-	altura db 0
-	i db 0
-	j db 0
-	y db 0
-	z db 0
+	altura dd 0
+	i dd 0
+	j dd 0
+	y dw 0 
+	z dw 0 
 	c db 0
-	x db 0
+	x dw 0 
 	msg1 db "Valor de altura = " ,0
 	msg2 db "" ,0
 	msg3 db "Valor de x: " ,0
