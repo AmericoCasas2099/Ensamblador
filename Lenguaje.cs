@@ -118,9 +118,9 @@ namespace Ensamblador
                 }
             }
             foreach (Msg m in listaMsg)
-            {            
-                    //asm.WriteLine("\t" + m.Nombre + " db \"" + m.Texto + "\" ,13, 0");
-                    asm.WriteLine("\t" + m.Nombre + " db \"" + m.Texto + "\" ,0");
+            {
+                //asm.WriteLine("\t" + m.Nombre + " db \"" + m.Texto + "\" ,13, 0");
+                asm.WriteLine("\t" + m.Nombre + " db \"" + m.Texto + "\" ,0");
             }
         }
 
@@ -132,13 +132,16 @@ namespace Ensamblador
                 throw new Error("Semantico: la variable \"" + Contenido + "\" ya ha sido declarada; linea: " + linea, log);
             }
             listaVariables.Add(new Variable(Contenido, t));
-            var variable = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
-
+            // var variable = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
+            string variable = Contenido;
             match(Tipos.Identificador);
             if (Contenido == "=")
             {
                 match("=");
                 Expresion();
+                //asm.WriteLine("\t;Asignacion a "+variable);
+                asm.WriteLine("\tpop eax");
+                asm.WriteLine("\tmov dword [" + variable + "], eax");
             }
             if (Contenido == ",")
             {
@@ -320,6 +323,8 @@ namespace Ensamblador
                 asm.WriteLine("\tmov dword [" + variable + "], edx");*/
             }
             // match(";");
+            asm.WriteLine("; Fin asignacion a " + variable);
+
             v.Valor = nuevoValor;
             log.WriteLine(variable + " = " + nuevoValor);
         }
@@ -517,6 +522,40 @@ namespace Ensamblador
             asm.WriteLine("; for" + cFor);
             string etiquetaIni = "_ForIni" + cFor;
             string etiquetaFin = "_ForFin" + cFor;
+            string etiquetaC = "_CondicionFor" + cFor;
+            string etiquetaA = "_AsignacionFor" + cFor;
+            string etiquetaO = "_OperacionFor" + cFor++;
+            string resultado;
+
+            match("for");
+            match("(");
+            asm.WriteLine(";" + etiquetaA + ":");
+            Asignacion();
+            asm.WriteLine(etiquetaIni + ":");
+            match(";");
+            asm.WriteLine(";" + etiquetaC + ":");
+            Condicion(etiquetaFin);
+            match(";");
+            var v = listaVariables.Find(delegate (Variable x) { return x.Nombre == Contenido; });
+
+            resultado = operacionFor(v.Nombre);
+            match(")");
+            if (Contenido == "{")
+            {
+                bloqueInstrucciones();
+            }
+            else
+            {
+                Instruccion();
+            }
+            asm.WriteLine(";" + etiquetaO + ":");
+            asm.WriteLine(resultado);
+            asm.WriteLine("jmp " + etiquetaIni);
+            asm.WriteLine(etiquetaFin + ":");
+            /*
+            asm.WriteLine("; for" + cFor);
+            string etiquetaIni = "_ForIni" + cFor;
+            string etiquetaFin = "_ForFin" + cFor;
             string etiquetaIncremento = "_forIncremento" + cFor;
             string etiquetaInstruction = "_forInstruction" + cFor;
 
@@ -543,6 +582,7 @@ namespace Ensamblador
             }
             asm.WriteLine("     jmp " + etiquetaIncremento); 
             asm.WriteLine(etiquetaFin + ":");
+            */
         }
 
 
@@ -584,9 +624,9 @@ namespace Ensamblador
 
             string texto;
             match("(");
-            if(RorWr == true)
+            if (RorWr == true)
             {
-                if(RLine == true)
+                if (RLine == true)
                 {
                     asm.WriteLine("\tpush dword 0");
                     asm.WriteLine("\tpush dword 100");
@@ -603,46 +643,46 @@ namespace Ensamblador
                     match(Tipos.Identificador);
                 }
                 match(")");
-           
+
                 match(";");
 
             }
             else
             {
-                 if (Clasificacion == Tipos.Cadena)
+                if (Clasificacion == Tipos.Cadena)
                 {
 
-                texto = Contenido.Replace("\"", "");
-                listaMsg.Add(new Msg(texto, "msg" + cMsg));
-                match(Tipos.Cadena);
-                asm.Write("\tPRINT_STRING ");
-                asm.WriteLine("msg" + cMsg);
-                cMsg++;
-                /*if(sLn == true){
-                    asm.WriteLine("\tNEWLINE");
-                }*/
+                    texto = Contenido.Replace("\"", "");
+                    listaMsg.Add(new Msg(texto, "msg" + cMsg));
+                    match(Tipos.Cadena);
+                    asm.Write("\tPRINT_STRING ");
+                    asm.WriteLine("msg" + cMsg);
+                    cMsg++;
+                    /*if(sLn == true){
+                        asm.WriteLine("\tNEWLINE");
+                    }*/
                 }
                 else
                 {
-                asm.WriteLine("\tmov eax, [" + Contenido + "]");
-                asm.WriteLine("\tpush eax");
-                asm.WriteLine("\tpush salida");
-                asm.WriteLine("\tcall printf");
-                match(Tipos.Identificador);
+                    asm.WriteLine("\tmov eax, [" + Contenido + "]");
+                    asm.WriteLine("\tpush eax");
+                    asm.WriteLine("\tpush salida");
+                    asm.WriteLine("\tcall printf");
+                    match(Tipos.Identificador);
 
-                }   
+                }
                 if (Contenido == "+")
                 {
                     listaConcatenacion();
                 }
                 match(")");
-            //listaMsg[cMsg - 2].Salto = sLn;
+                //listaMsg[cMsg - 2].Salto = sLn;
                 match(";");
                 if (sLn == true)
                 {
-                asm.WriteLine("\tNEWLINE");
+                    asm.WriteLine("\tNEWLINE");
                 }
-            }  
+            }
         }
         string listaConcatenacion()
         {

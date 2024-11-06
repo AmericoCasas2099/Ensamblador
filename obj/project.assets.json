@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\kazel\\.nuget\\packages\\": {}
+    "C:\\Users\\Americo\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kazel\\OneDrive\\Documentos\\TEC\\5to semestre\\Automatas II\\Ensamblador\\Ensamblador.csproj",
+      "projectUniqueName": "C:\\Users\\Americo\\Documents\\Repositorios\\Ensamblador\\Ensamblador.csproj",
       "projectName": "Ensamblador",
-      "projectPath": "C:\\Users\\kazel\\OneDrive\\Documentos\\TEC\\5to semestre\\Automatas II\\Ensamblador\\Ensamblador.csproj",
-      "packagesPath": "C:\\Users\\kazel\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kazel\\OneDrive\\Documentos\\TEC\\5to semestre\\Automatas II\\Ensamblador\\obj\\",
+      "projectPath": "C:\\Users\\Americo\\Documents\\Repositorios\\Ensamblador\\Ensamblador.csproj",
+      "packagesPath": "C:\\Users\\Americo\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Americo\\Documents\\Repositorios\\Ensamblador\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\kazel\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Americo\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"

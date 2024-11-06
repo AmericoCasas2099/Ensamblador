@@ -10,18 +10,18 @@ static void Main(string[] args)
     y=10;
     z=2;
     char c;
-
-    // c = (100+200);
     c = 100;
 
     Console.Write("Valor de altura = ");
     altura = Console.ReadLine();
     Console.WriteLine("");
-
     float x = (3 + altura) * 8 - (10 - 4) / 2; // = 61
+    Console.WriteLine("Valor de x: "+x);
     x--;
     x+=(altura*8);
     x*=2;
+    Console.WriteLine("Valor de x: "+x);
+    /*
     // x/=(y-6);
     int k=1;
     for (i = 1; k<=altura; k++) // mandar false y pedir de retorno el valor de la asignacion
@@ -60,25 +60,6 @@ static void Main(string[] args)
         i++;
     }
     while (i<altura*2);
-    Console.WriteLine("");
+    */
 }
-/*
- int x;
- x=10/2;
 
-Console.Write("Valor de x: "+x);
-
-
-for(x = 0; x < 4; x++)
-  {
-    Console.WriteLine("x es igual a: " + x+"");
-  }/*
-   else{
-      x=1;
-   }
-   if(x==0){
-      Console.WriteLine("x es mayor que 3");
-   }
-   else{
-      Console.WriteLine("x es menor que 3");
-   }*/
